@@ -1,18 +1,40 @@
 // src/components/Assets/AssetCard.jsx
 import { Link } from 'react-router-dom'
+import { assetService } from '../../services/assetService'
 
-const AssetCard = ({ asset, onDelete, isDeleting }) => {
-  const getStatusClass = (asset) => {
-    // Check if asset is assigned or has maintenance status
-    if (asset.status === 'maintenance') return 'status-maintenance'
-    if (asset.assignedTo) return 'status-in-use'
-    return 'status-available'
+const AssetCard = ({ asset, onAssetUpdate }) => {
+  const getStatusClass = (status) => {
+    switch(status) {
+      case 'available': return 'status-available'
+      case 'in-use': return 'status-in-use'
+      case 'maintenance': return 'status-maintenance'
+      case 'retired': return 'status-retired'
+      default: return ''
+    }
   }
 
-  const getStatusText = (asset) => {
-    if (asset.status === 'maintenance') return 'Maintenance'
-    if (asset.assignedTo) return 'In Use'
-    return 'Available'
+  const getStatusText = (status) => {
+    switch(status) {
+      case 'available': return 'Available'
+      case 'in-use': return 'In Use'
+      case 'maintenance': return 'Maintenance'
+      case 'retired': return 'Retired'
+      default: return status || 'Unknown'
+    }
+  }
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this asset?')) {
+      return
+    }
+
+    try {
+      await assetService.deleteAsset(id)
+      onAssetUpdate() // Refresh the list
+    } catch (error) {
+      console.error('Error deleting asset:', error)
+      alert('Failed to delete asset. Please try again.')
+    }
   }
 
   return (
@@ -22,8 +44,8 @@ const AssetCard = ({ asset, onDelete, isDeleting }) => {
           <h3 className="asset-name">{asset.name}</h3>
           <span className="asset-tag">{asset.tag || `ID: ${asset.assetId}`}</span>
         </div>
-        <span className={`asset-status ${getStatusClass(asset)}`}>
-          {getStatusText(asset)}
+        <span className={`asset-status ${getStatusClass(asset.status)}`}>
+          {getStatusText(asset.status)}
         </span>
       </div>
       
@@ -51,18 +73,17 @@ const AssetCard = ({ asset, onDelete, isDeleting }) => {
       </div>
       
       <div className="asset-actions">
-        <Link to={`/assets/${asset.assetId || asset.id}`} className="btn btn-primary">
+        <Link to={`/assets/${asset.assetId}`} className="btn btn-primary">
           View Details
         </Link>
-        <Link to={`/assets/edit/${asset.assetId || asset.id}`} className="btn btn-secondary">
+        <Link to={`/assets/edit/${asset.assetId}`} className="btn btn-secondary">
           Edit
         </Link>
         <button 
           className="btn btn-danger" 
-          onClick={() => onDelete(asset.assetId || asset.id)}
-          disabled={isDeleting}
+          onClick={() => handleDelete(asset.assetId)}
         >
-          {isDeleting ? 'Deleting...' : 'Delete'}
+          Delete
         </button>
       </div>
     </div>

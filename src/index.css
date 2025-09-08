@@ -787,3 +787,19 @@ body {
   background-color: #e3f2fd;
   color: #1565c0;
 }
+
+/* Add to your index.css */
+.error {
+  border-color: #e74c3c !important;
+}
+
+.error-text {
+  color: #e74c3c;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.form-group {
+  position: relative;
+}

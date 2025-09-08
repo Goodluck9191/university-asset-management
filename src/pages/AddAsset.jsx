@@ -9,6 +9,7 @@ const AddAsset = () => {
   const navigate = useNavigate()
   const [locations, setLocations] = useState([])
   const [loading, setLoading] = useState(true)
+  // Removed unused error state
 
   useEffect(() => {
     fetchLocations()
@@ -20,6 +21,12 @@ const AddAsset = () => {
       setLocations(response.data)
     } catch (error) {
       console.error('Error fetching locations:', error)
+      // Fallback to mock locations
+      setLocations([
+        { locationId: 1, name: 'Computer Lab A' },
+        { locationId: 2, name: 'Lecture Hall B' },
+        { locationId: 3, name: 'Library' }
+      ])
     } finally {
       setLoading(false)
     }

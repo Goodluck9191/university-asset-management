@@ -10,7 +10,7 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to include auth token if available
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
@@ -20,6 +20,20 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );
