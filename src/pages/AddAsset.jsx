@@ -9,7 +9,7 @@ const AddAsset = () => {
   const navigate = useNavigate()
   const [locations, setLocations] = useState([])
   const [loading, setLoading] = useState(true)
-  // Removed unused error state
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetchLocations()
@@ -36,6 +36,11 @@ const AddAsset = () => {
     try {
       await assetService.createAsset(assetData)
       alert('Asset added successfully!')
+      
+      // Refresh the assets list in the Assets page
+      window.dispatchEvent(new CustomEvent('refreshAssets'))
+      
+      // Navigate back to assets page
       navigate('/assets')
     } catch (error) {
       console.error('Error creating asset:', error)
@@ -51,6 +56,8 @@ const AddAsset = () => {
         <h2>Add New Asset</h2>
         <p>Register a new asset to the university inventory</p>
       </div>
+      
+      {error && <div className="error-message">{error}</div>}
       
       <AssetForm 
         onSubmit={handleSubmit} 

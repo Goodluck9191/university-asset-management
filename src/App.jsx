@@ -1,4 +1,4 @@
-// src/App.jsx
+// Update your App.jsx to include authentication routes
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout/Layout'
@@ -9,6 +9,7 @@ import Reports from './pages/Reports'
 import AssetDetails from './pages/AssetDetails'
 import EditAsset from './pages/EditAsset'
 import Login from './pages/Login'
+import Register from './pages/Register'
 import Users from './pages/Users'
 import Assignments from './pages/Assignments'
 import Maintenance from './pages/Maintenance'
@@ -20,7 +21,6 @@ function App() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Check if user is logged in on app load
   useEffect(() => {
     const currentUser = authService.getCurrentUser()
     if (currentUser) {
@@ -65,6 +65,7 @@ function App() {
         ) : (
           <Routes>
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/register" element={<Register onLogin={handleLogin} />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         )}

@@ -1,67 +1,84 @@
-// src/services/assetService.js
-import api from './api';
+// src/services/assetService.js (Frontend-only version)
+let assets = JSON.parse(localStorage.getItem('assets') || '[]');
+
+const normalizeStatus = (status) => {
+  if (!status) return 'available';
+  
+  const statusLower = String(status).toLowerCase().trim();
+  switch (statusLower) {
+    case 'in-use':
+    case 'in use':
+    case 'use':
+      return 'in-use';
+    case 'maintenance':
+      return 'maintenance';
+    case 'retired':
+      return 'retired';
+    case 'available':
+      return 'available';
+    default:
+      return statusLower;
+  }
+};
 
 export const assetService = {
   getAllAssets: async () => {
-    try {
-      const response = await api.get('/assets');
-      return response;
-    } catch (error) {
-      console.error('Error fetching assets:', error);
-      throw error;
-    }
-  },
-
-  getAssetById: async (id) => {
-    try {
-      const response = await api.get(`/assets/${id}`);
-      return response;
-    } catch (error) {
-      console.error('Error fetching asset:', error);
-      throw error;
-    }
+    console.log('📦 Using frontend storage only');
+    return { 
+      data: assets.map(asset => ({
+        ...asset,
+        status: normalizeStatus(asset.status)
+      }))
+    };
   },
 
   createAsset: async (assetData) => {
-    try {
-      // Ensure the data matches your Spring Boot entity structure
-      const formattedData = {
-        name: assetData.name,
-        description: assetData.description,
-        location: assetData.location // This should be a Location object with locationId
-      };
-      
-      const response = await api.post('/assets', formattedData);
-      return response;
-    } catch (error) {
-      console.error('Error creating asset:', error);
-      throw error;
-    }
+    const newAsset = {
+      ...assetData,
+      assetId: Date.now(),
+      status: normalizeStatus(assetData.status),
+      createdAt: new Date().toISOString()
+    };
+    
+    assets.push(newAsset);
+    localStorage.setItem('assets', JSON.stringify(assets));
+    console.log('💾 Saved new asset:', newAsset);
+    
+    return { data: newAsset };
+  },
+
+  getAssetById: async (id) => {
+    const asset = assets.find(a => a.assetId == id || a.id == id);
+    if (!asset) throw new Error('Asset not found');
+    
+    return { 
+      data: {
+        ...asset,
+        status: normalizeStatus(asset.status)
+      }
+    };
   },
 
   updateAsset: async (id, assetData) => {
-    try {
-      const formattedData = {
-        name: assetData.name,
-        description: assetData.description,
-        location: assetData.location
-      };
-      
-      const response = await api.put(`/assets/${id}`, formattedData);
-      return response;
-    } catch (error) {
-      console.error('Error updating asset:', error);
-      throw error;
-    }
+    const index = assets.findIndex(a => a.assetId == id || a.id == id);
+    if (index === -1) throw new Error('Asset not found');
+    
+    const updatedAsset = {
+      ...assets[index],
+      ...assetData,
+      status: normalizeStatus(assetData.status)
+    };
+    
+    assets[index] = updatedAsset;
+    localStorage.setItem('assets', JSON.stringify(assets));
+    
+    return { data: updatedAsset };
   },
 
   deleteAsset: async (id) => {
-    try {
-      const response = await api.delete(`/assets/${id}`);
-      return response;
-    } catch (error) {
-      console.error('Error deleting asset:', error);
-      throw error;
-    }
+    assets = assets.filter(a => !(a.assetId == id || a.id == id));
+    localStorage.setItem('assets', JSON.stringify(assets));
+    
+    return { success: true };
   }
 };

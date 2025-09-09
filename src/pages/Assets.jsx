@@ -13,10 +13,7 @@ const Assets = () => {
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  useEffect(() => {
-    fetchAssets()
-  }, [])
-
+  // Fetch assets function
   const fetchAssets = async () => {
     try {
       setLoading(true)
@@ -26,32 +23,28 @@ const Assets = () => {
     } catch (err) {
       console.error('Error fetching assets:', err)
       setError('Failed to fetch assets. Please try again.')
-      // Fallback to mock data if backend is not available
-      setAssets(getMockAssets())
+      // Fallback to empty array instead of mock data
+      setAssets([])
     } finally {
       setLoading(false)
     }
   }
 
-  // Mock data for fallback
-  const getMockAssets = () => {
-    return [
-      {
-        assetId: 1,
-        name: 'Dell Latitude Laptop',
-        description: 'Dell Latitude 5420, 16GB RAM, 512GB SSD',
-        location: { locationId: 1, name: 'Computer Lab A' },
-        status: 'available'
-      },
-      {
-        assetId: 2,
-        name: 'Projector Epson',
-        description: 'Epson HD Projector with 4000 lumens',
-        location: { locationId: 2, name: 'Lecture Hall B' },
-        status: 'in-use'
-      }
-    ]
-  }
+  // Initial load and setup refresh callback
+  useEffect(() => {
+    fetchAssets()
+    
+    // Listen for custom event to refresh assets
+    const handleRefreshAssets = () => {
+      fetchAssets()
+    }
+    
+    window.addEventListener('refreshAssets', handleRefreshAssets)
+    
+    return () => {
+      window.removeEventListener('refreshAssets', handleRefreshAssets)
+    }
+  }, [])
 
   const handleAddAsset = () => {
     navigate('/add-asset')

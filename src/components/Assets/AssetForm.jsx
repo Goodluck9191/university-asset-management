@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react'
 
 const AssetForm = ({ onSubmit, editAsset = null, locations = [] }) => {
   const [formData, setFormData] = useState({
-    name: editAsset?.name || '',
-    description: editAsset?.description || '',
-    location: editAsset?.location ? 
-      (typeof editAsset.location === 'object' ? editAsset.location.locationId : editAsset.location) 
-      : '',
-    status: editAsset?.status || 'available'
+    name: '',
+    description: '',
+    location: '',
+    status: 'available', // Default status
+    category: '',
+    tag: '',
+    purchaseDate: '',
+    value: ''
   })
 
   const [errors, setErrors] = useState({})
@@ -21,7 +23,11 @@ const AssetForm = ({ onSubmit, editAsset = null, locations = [] }) => {
         location: editAsset.location ? 
           (typeof editAsset.location === 'object' ? editAsset.location.locationId : editAsset.location) 
           : '',
-        status: editAsset.status || 'available'
+        status: editAsset.status || 'available',
+        category: editAsset.category || '',
+        tag: editAsset.tag || '',
+        purchaseDate: editAsset.purchaseDate || '',
+        value: editAsset.value || ''
       })
     }
   }, [editAsset])
@@ -51,6 +57,10 @@ const AssetForm = ({ onSubmit, editAsset = null, locations = [] }) => {
     
     if (!formData.location) {
       newErrors.location = 'Location is required'
+    }
+    
+    if (!formData.status) {
+      newErrors.status = 'Status is required'
     }
     
     setErrors(newErrors)
@@ -87,35 +97,56 @@ const AssetForm = ({ onSubmit, editAsset = null, locations = [] }) => {
               value={formData.name}
               onChange={handleChange}
               className={errors.name ? 'error' : ''}
+              placeholder="Enter asset name"
             />
             {errors.name && <span className="error-text">{errors.name}</span>}
           </div>
           <div className="form-group">
-            <label htmlFor="status">Status</label>
-            <select
-              id="status"
-              name="status"
-              value={formData.status}
+            <label htmlFor="tag">Asset Tag</label>
+            <input
+              type="text"
+              id="tag"
+              name="tag"
+              value={formData.tag}
               onChange={handleChange}
-            >
-              <option value="available">Available</option>
-              <option value="in-use">In Use</option>
-              <option value="maintenance">Under Maintenance</option>
-            </select>
+              placeholder="e.g., IT-001"
+            />
           </div>
         </div>
 
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
+            <label htmlFor="category">Category</label>
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
               onChange={handleChange}
-              rows="3"
-              placeholder="Enter asset description"
-            />
+            >
+              <option value="">Select category</option>
+              <option value="IT Equipment">IT Equipment</option>
+              <option value="Audio Visual">Audio Visual</option>
+              <option value="Furniture">Furniture</option>
+              <option value="Laboratory">Laboratory</option>
+              <option value="Vehicles">Vehicles</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="status">Status *</label>
+            <select
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className={errors.status ? 'error' : ''}
+            >
+              <option value="available">Available</option>
+              <option value="in-use">In Use</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="retired">Retired</option>
+            </select>
+            {errors.status && <span className="error-text">{errors.status}</span>}
           </div>
         </div>
 
@@ -138,6 +169,42 @@ const AssetForm = ({ onSubmit, editAsset = null, locations = [] }) => {
             </select>
             {errors.location && <span className="error-text">{errors.location}</span>}
           </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="purchaseDate">Purchase Date</label>
+            <input
+              type="date"
+              id="purchaseDate"
+              name="purchaseDate"
+              value={formData.purchaseDate}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="value">Value ($)</label>
+            <input
+              type="text"
+              id="value"
+              name="value"
+              value={formData.value}
+              onChange={handleChange}
+              placeholder="e.g., 1200.00"
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            rows="3"
+            placeholder="Enter asset description"
+          />
         </div>
 
         <div className="form-actions">

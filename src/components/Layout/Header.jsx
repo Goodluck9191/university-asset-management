@@ -1,5 +1,5 @@
-// src/components/Layout/Header.jsx
-import { useState } from 'react'
+// Update your Header component to show user info
+import React, { useState } from 'react';
 
 const Header = ({ user, onLogout }) => {
   const [showDropdown, setShowDropdown] = useState(false)
@@ -14,16 +14,24 @@ const Header = ({ user, onLogout }) => {
           className="user-profile" 
           onClick={() => setShowDropdown(!showDropdown)}
         >
-          <img src={user.avatar} alt={user.name} className="avatar" />
+          <div className="avatar">
+            {user?.avatar || user?.name?.charAt(0) || 'U'}
+          </div>
           <div className="user-info">
-            <span className="user-name">{user.name}</span>
-            <span className="user-role">{user.role}</span>
+            <span className="user-name">{user?.name || 'User'}</span>
+            <span className="user-role">{user?.role || 'Staff'}</span>
           </div>
           
           {showDropdown && (
             <div className="user-dropdown">
-              <button className="dropdown-item">Profile</button>
-              <button className="dropdown-item">Settings</button>
+              <div className="dropdown-item user-profile-info">
+                <strong>{user?.name}</strong>
+                <br />
+                <small>{user?.email}</small>
+                <br />
+                <small>Role: {user?.role}</small>
+              </div>
+              <button className="dropdown-item">Profile Settings</button>
               <button className="dropdown-item" onClick={onLogout}>Logout</button>
             </div>
           )}
@@ -33,4 +41,4 @@ const Header = ({ user, onLogout }) => {
   )
 }
 
-export default Header
+export default Header;

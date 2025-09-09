@@ -3,24 +3,31 @@ import { Link } from 'react-router-dom'
 import { assetService } from '../../services/assetService'
 
 const AssetCard = ({ asset, onAssetUpdate }) => {
+  // Get the correct asset ID (handle both backend and mock data)
+  const getAssetId = () => {
+    return asset.assetId || asset.id || asset.tag
+  }
+
   const getStatusClass = (status) => {
-    switch(status) {
-      case 'available': return 'status-available'
-      case 'in-use': return 'status-in-use'
-      case 'maintenance': return 'status-maintenance'
-      case 'retired': return 'status-retired'
-      default: return ''
-    }
+    if (!status) return 'status-unknown'
+    
+    const statusLower = status.toLowerCase()
+    if (statusLower.includes('use') || statusLower === 'in use') return 'status-in-use'
+    if (statusLower.includes('available') || statusLower === 'available') return 'status-available'
+    if (statusLower.includes('maintenance') || statusLower === 'maintenance') return 'status-maintenance'
+    if (statusLower.includes('retired') || statusLower === 'retired') return 'status-retired'
+    return 'status-unknown'
   }
 
   const getStatusText = (status) => {
-    switch(status) {
-      case 'available': return 'Available'
-      case 'in-use': return 'In Use'
-      case 'maintenance': return 'Maintenance'
-      case 'retired': return 'Retired'
-      default: return status || 'Unknown'
-    }
+    if (!status) return 'Unknown'
+    
+    const statusLower = status.toLowerCase()
+    if (statusLower.includes('use') || statusLower === 'in use') return 'In Use'
+    if (statusLower.includes('available') || statusLower === 'available') return 'Available'
+    if (statusLower.includes('maintenance') || statusLower === 'maintenance') return 'Maintenance'
+    if (statusLower.includes('retired') || statusLower === 'retired') return 'Retired'
+    return status
   }
 
   const handleDelete = async (id) => {
@@ -30,6 +37,8 @@ const AssetCard = ({ asset, onAssetUpdate }) => {
 
     try {
       await assetService.deleteAsset(id)
+      // Refresh the assets list
+      window.dispatchEvent(new CustomEvent('refreshAssets'))
       onAssetUpdate() // Refresh the list
     } catch (error) {
       console.error('Error deleting asset:', error)
@@ -37,22 +46,26 @@ const AssetCard = ({ asset, onAssetUpdate }) => {
     }
   }
 
+  const assetId = getAssetId()
+  const statusClass = getStatusClass(asset.status)
+  const statusText = getStatusText(asset.status)
+
   return (
     <div className="asset-card">
       <div className="asset-header">
         <div>
           <h3 className="asset-name">{asset.name}</h3>
-          <span className="asset-tag">{asset.tag || `ID: ${asset.assetId}`}</span>
+          <span className="asset-tag">{asset.tag || `ID: ${assetId}`}</span>
         </div>
-        <span className={`asset-status ${getStatusClass(asset.status)}`}>
-          {getStatusText(asset.status)}
+        <span className={`asset-status ${statusClass}`}>
+          {statusText}
         </span>
       </div>
       
       <div className="asset-details">
         <div className="asset-detail">
-          <span className="detail-label">Description:</span>
-          <span className="detail-value">{asset.description || 'N/A'}</span>
+          <span className="detail-label">Category:</span>
+          <span className="detail-value">{asset.category || 'N/A'}</span>
         </div>
         {asset.location && (
           <div className="asset-detail">
@@ -73,15 +86,15 @@ const AssetCard = ({ asset, onAssetUpdate }) => {
       </div>
       
       <div className="asset-actions">
-        <Link to={`/assets/${asset.assetId}`} className="btn btn-primary">
+        <Link to={`/assets/${assetId}`} className="btn btn-primary">
           View Details
         </Link>
-        <Link to={`/assets/edit/${asset.assetId}`} className="btn btn-secondary">
+        <Link to={`/assets/edit/${assetId}`} className="btn btn-secondary">
           Edit
         </Link>
         <button 
           className="btn btn-danger" 
-          onClick={() => handleDelete(asset.assetId)}
+          onClick={() => handleDelete(assetId)}
         >
           Delete
         </button>
